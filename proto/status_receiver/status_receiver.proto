@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package proto.status_receiver;
+option go_package  = "github.com/coigo/micro-cloud/proto/status_receiver";
+
+import "google/protobuf/empty.proto";
+
+service StatusReceiverService  {
+    rpc ShareStatus (ImageStatus) returns (google.protobuf.Empty);
+}
+
+message ImageStatus {
+    string machine_id = 1;
+    string cpu_usage = 2;
+    string ram_usage = 3;
+    repeated RunningImage running_images = 4;
+}
+
+message RunningImage {
+    string machine_id = 1;
+    string cpu_usage = 2;
+    string ram_usage = 3;
+}
