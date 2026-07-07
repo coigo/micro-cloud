@@ -1,0 +1,1 @@
+Este é um projeto que tenta replicar o funcionamento de clouds como AWS :)
