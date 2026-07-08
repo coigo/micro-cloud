@@ -21,7 +21,7 @@ func main() {
 		fmt.Errorf("Erro ->> %v", err)
 	}
 	defer conn.Close()
-
+	
 	c := proto.NewStatusReceiverServiceClient(conn)
 
 	for {
@@ -37,7 +37,7 @@ func main() {
 		
 		fmt.Println("Fazendo requisição")
 		c.ShareStatus(ctx, &proto.ImageStatus{
-			MachineId:     "123",
+			MachineId:     "121233",
 			CpuUsage:      strconv.FormatFloat(cpuUsage[0], 'f', -1, 64),
 			RamUsage:      strconv.FormatUint(memUsage.Used/1024/1024, 10),
 			RunningImages: []*proto.RunningImage{},
@@ -45,7 +45,7 @@ func main() {
 			RamTotal: "teste",
 		})
 		
-		time.Sleep(5 * time.Second)
+		time.Sleep(10 * time.Second)
 	}
 
 }

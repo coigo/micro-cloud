@@ -1,28 +1,42 @@
 version: "3.8"
 
 services:
-  dind1:
-    image: docker:dind
-    container_name: dind1
-    privileged: true
-    mem_limit: 1g
-    mem_reservation: 512m
-    cpus: "0.50"
-    volumes:
-      - dind1-data:/var/lib/docker
+  # dind1:
+  #   image: docker:dind
+  #   container_name: dind1
+  #   privileged: true
+  #   mem_limit: 1g
+  #   mem_reservation: 512m
+  #   cpus: "0.50"
+  #   volumes:
+  #     - dind1-data:/var/lib/docker
+  #   restart: unless-stopped
+
+  # dind2:
+  #   image: docker:dind
+  #   container_name: dind2
+  #   privileged: true
+  #   mem_limit: 1g
+  #   mem_reservation: 512m
+  #   cpus: "0.50"
+  #   volumes:
+  #     - dind2-data:/var/lib/docker
+  #   restart: unless-stopped
+
+   redis:
+    image: redis:8-alpine
+    container_name: redis
     restart: unless-stopped
 
-  dind2:
-    image: docker:dind
-    container_name: dind2
-    privileged: true
-    mem_limit: 1g
-    mem_reservation: 512m
-    cpus: "0.50"
+    ports:
+      - "6379:6379"
+
     volumes:
-      - dind2-data:/var/lib/docker
-    restart: unless-stopped
+      - redis_data:/data
+
+    command: redis-server --appendonly yes
 
 volumes:
+  redis_data:
   dind1-data:
   dind2-data:
