@@ -1,16 +1,24 @@
 version: "3.8"
 
 services:
-  # dind1:
-  #   image: docker:dind
-  #   container_name: dind1
-  #   privileged: true
-  #   mem_limit: 1g
-  #   mem_reservation: 512m
-  #   cpus: "0.50"
-  #   volumes:
-  #     - dind1-data:/var/lib/docker
-  #   restart: unless-stopped
+
+   controll:
+      build: ./controll
+      container_name: controll
+      ports:
+         - 50051:50051 
+      restart: unless-stopped
+      
+   dind1:
+      build: ./image
+      container_name: dind1
+      privileged: true
+      mem_limit: 1g
+      mem_reservation: 512m
+      cpus: "0.50"
+      volumes:
+         - dind1-data:/var/lib/docker
+      restart: unless-stopped
 
   # dind2:
   #   image: docker:dind

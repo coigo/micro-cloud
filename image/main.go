@@ -3,9 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"strconv"
 
-	// "strconv"
+	"strconv"
 	"time"
 
 	proto "github.com/coigo/image/proto/status_receiver"
@@ -16,7 +15,7 @@ import (
 )
 
 func main() {
-	conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("controll:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		fmt.Errorf("Erro ->> %v", err)
 	}
@@ -25,7 +24,7 @@ func main() {
 	c := proto.NewStatusReceiverServiceClient(conn)
 
 	for {
-
+		fmt.Println("weee")
 		cpuUsage, err := cpu.Percent(time.Second, false)
 		if (err != nil) {
 			fmt.Errorf("err %v" , err)
@@ -45,7 +44,7 @@ func main() {
 			RamTotal: "teste",
 		})
 		
-		time.Sleep(10 * time.Second)
+		time.Sleep(5 * time.Second)
 	}
 
 }
