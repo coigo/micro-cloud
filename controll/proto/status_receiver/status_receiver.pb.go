@@ -28,6 +28,8 @@ type ImageStatus struct {
 	CpuUsage      string                 `protobuf:"bytes,2,opt,name=cpu_usage,json=cpuUsage,proto3" json:"cpu_usage,omitempty"`
 	RamUsage      string                 `protobuf:"bytes,3,opt,name=ram_usage,json=ramUsage,proto3" json:"ram_usage,omitempty"`
 	RunningImages []*RunningImage        `protobuf:"bytes,4,rep,name=running_images,json=runningImages,proto3" json:"running_images,omitempty"`
+	CpuTotal      string                 `protobuf:"bytes,5,opt,name=cpu_total,json=cpuTotal,proto3" json:"cpu_total,omitempty"`
+	RamTotal      string                 `protobuf:"bytes,6,opt,name=ram_total,json=ramTotal,proto3" json:"ram_total,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -90,11 +92,27 @@ func (x *ImageStatus) GetRunningImages() []*RunningImage {
 	return nil
 }
 
+func (x *ImageStatus) GetCpuTotal() string {
+	if x != nil {
+		return x.CpuTotal
+	}
+	return ""
+}
+
+func (x *ImageStatus) GetRamTotal() string {
+	if x != nil {
+		return x.RamTotal
+	}
+	return ""
+}
+
 type RunningImage struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	MachineId     string                 `protobuf:"bytes,1,opt,name=machine_id,json=machineId,proto3" json:"machine_id,omitempty"`
 	CpuUsage      string                 `protobuf:"bytes,2,opt,name=cpu_usage,json=cpuUsage,proto3" json:"cpu_usage,omitempty"`
 	RamUsage      string                 `protobuf:"bytes,3,opt,name=ram_usage,json=ramUsage,proto3" json:"ram_usage,omitempty"`
+	CpuTotal      string                 `protobuf:"bytes,4,opt,name=cpu_total,json=cpuTotal,proto3" json:"cpu_total,omitempty"`
+	RamTotal      string                 `protobuf:"bytes,5,opt,name=ram_total,json=ramTotal,proto3" json:"ram_total,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -150,22 +168,40 @@ func (x *RunningImage) GetRamUsage() string {
 	return ""
 }
 
+func (x *RunningImage) GetCpuTotal() string {
+	if x != nil {
+		return x.CpuTotal
+	}
+	return ""
+}
+
+func (x *RunningImage) GetRamTotal() string {
+	if x != nil {
+		return x.RamTotal
+	}
+	return ""
+}
+
 var File_proto_status_receiver_status_receiver_proto protoreflect.FileDescriptor
 
 const file_proto_status_receiver_status_receiver_proto_rawDesc = "" +
 	"\n" +
-	"+proto/status_receiver/status_receiver.proto\x12\x15proto.status_receiver\x1a\x1bgoogle/protobuf/empty.proto\"\xb2\x01\n" +
+	"+proto/status_receiver/status_receiver.proto\x12\x15proto.status_receiver\x1a\x1bgoogle/protobuf/empty.proto\"\xec\x01\n" +
 	"\vImageStatus\x12\x1d\n" +
 	"\n" +
 	"machine_id\x18\x01 \x01(\tR\tmachineId\x12\x1b\n" +
 	"\tcpu_usage\x18\x02 \x01(\tR\bcpuUsage\x12\x1b\n" +
 	"\tram_usage\x18\x03 \x01(\tR\bramUsage\x12J\n" +
-	"\x0erunning_images\x18\x04 \x03(\v2#.proto.status_receiver.RunningImageR\rrunningImages\"g\n" +
+	"\x0erunning_images\x18\x04 \x03(\v2#.proto.status_receiver.RunningImageR\rrunningImages\x12\x1b\n" +
+	"\tcpu_total\x18\x05 \x01(\tR\bcpuTotal\x12\x1b\n" +
+	"\tram_total\x18\x06 \x01(\tR\bramTotal\"\xa1\x01\n" +
 	"\fRunningImage\x12\x1d\n" +
 	"\n" +
 	"machine_id\x18\x01 \x01(\tR\tmachineId\x12\x1b\n" +
 	"\tcpu_usage\x18\x02 \x01(\tR\bcpuUsage\x12\x1b\n" +
-	"\tram_usage\x18\x03 \x01(\tR\bramUsage2b\n" +
+	"\tram_usage\x18\x03 \x01(\tR\bramUsage\x12\x1b\n" +
+	"\tcpu_total\x18\x04 \x01(\tR\bcpuTotal\x12\x1b\n" +
+	"\tram_total\x18\x05 \x01(\tR\bramTotal2b\n" +
 	"\x15StatusReceiverService\x12I\n" +
 	"\vShareStatus\x12\".proto.status_receiver.ImageStatus\x1a\x16.google.protobuf.EmptyB4Z2github.com/coigo/micro-cloud/proto/status_receiverb\x06proto3"
 

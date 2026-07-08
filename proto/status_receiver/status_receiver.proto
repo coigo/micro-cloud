@@ -14,10 +14,14 @@ message ImageStatus {
     string cpu_usage = 2;
     string ram_usage = 3;
     repeated RunningImage running_images = 4;
+    string cpu_total = 5;
+    string ram_total = 6;
 }
 
 message RunningImage {
     string machine_id = 1;
     string cpu_usage = 2;
     string ram_usage = 3;
+    string cpu_total = 4;
+    string ram_total = 5;
 }

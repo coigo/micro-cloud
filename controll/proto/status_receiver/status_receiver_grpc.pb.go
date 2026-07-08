@@ -26,7 +26,27 @@ const (
 // StatusReceiverServiceClient is the client API for StatusReceiverService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type StatusReceiverServiceClient interface {
+	ShareStatus(ctx context.Context, in *ImageStatus, opts ...grpc.CallOption) (*emptypb.Empty, error)
+}
 
+type statusReceiverServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewStatusReceiverServiceClient(cc grpc.ClientConnInterface) StatusReceiverServiceClient {
+	return &statusReceiverServiceClient{cc}
+}
+
+func (c *statusReceiverServiceClient) ShareStatus(ctx context.Context, in *ImageStatus, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, StatusReceiverService_ShareStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
 
 // StatusReceiverServiceServer is the server API for StatusReceiverService service.
 // All implementations must embed UnimplementedStatusReceiverServiceServer

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 	"sync"
+	"time"
 
 	proto "github.com/coigo/micro-cloud/proto/status_receiver"
 	"google.golang.org/grpc"
@@ -19,22 +20,19 @@ type server struct {
 }
 
 func (s *server) ShareStatus (ctx context.Context, imageStatus *proto.ImageStatus ) (*emptypb.Empty, error)  {
-	fmt.Println("aqui ->>", imageStatus)
+	fmt.Println(time.Now().Unix(), " | Nova requisição ", imageStatus)
 	return &emptypb.Empty{}, nil
 }
 
 func main () {
-	fmt.Println("funcionando?")
 
 	lis, err := net.Listen("tcp",":50051")
 	if (err != nil) {
 		fmt.Errorf("Erro ouvindo a porta 50051")
 	}
-	fmt.Println("funcionando?")
 
 	grpcServer := grpc.NewServer()
 	proto.RegisterStatusReceiverServiceServer(grpcServer, &server{})
-	fmt.Println("funcionando?")
 
 	var wg sync.WaitGroup
 
@@ -49,9 +47,9 @@ func main () {
 	}()
 	
 	
-	fmt.Println("funcionando?")
 	wg.Wait()
+	
 	// dockerId := commandservice.UpCommand()
-	// fmt.Printf("Container %v criado.\n", dockerId)
+	fmt.Printf("Container %v criado.\n")
 	// commandservice.DownCommand(dockerId)
 }
