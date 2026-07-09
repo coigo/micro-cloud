@@ -3,13 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 
-	"strconv"
 	"time"
 
 	proto "github.com/coigo/image/proto/status_receiver"
-	"github.com/shirou/gopsutil/v4/cpu"
-	"github.com/shirou/gopsutil/v4/mem"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -25,23 +23,29 @@ func main() {
 
 	for {
 		fmt.Println("weee")
-		cpuUsage, err := cpu.Percent(time.Second, false)
-		if (err != nil) {
-			fmt.Errorf("err %v" , err)
+
+		hostname, err := os.Hostname()
+		if err != nil {
+			fmt.Errorf("host err %v" , err)
+			
 		}
-		memUsage, err := mem.VirtualMemory()
-	
+		
+		memCurr, _ := os.ReadFile("/sys/fs/cgroup/memory.current")
+		memMax, _ := os.ReadFile("/sys/fs/cgroup/memory.max")
+		cpuMax, _ := os.ReadFile("/sys/fs/cgroup/cpu.max")
+		cpuCurr, _ := os.ReadFile("/sys/fs/cgroup/cpu.stat")
+		
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 		
 		fmt.Println("Fazendo requisição")
 		c.ShareStatus(ctx, &proto.ImageStatus{
-			MachineId:     "121233",
-			CpuUsage:      strconv.FormatFloat(cpuUsage[0], 'f', -1, 64),
-			RamUsage:      strconv.FormatUint(memUsage.Used/1024/1024, 10),
+			MachineId:     hostname,
+			CpuUsage:      string(cpuCurr),
+			RamUsage:      string(memCurr),
 			RunningImages: []*proto.RunningImage{},
-			CpuTotal: "teste",
-			RamTotal: "teste",
+			CpuTotal:      string(cpuMax),
+			RamTotal:      string(memMax),
 		})
 		
 		time.Sleep(5 * time.Second)

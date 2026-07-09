@@ -26,20 +26,6 @@ func (s *server) ShareStatus (ctx context.Context, imageStatus *proto.ImageStatu
 	}
 
 	infra.Redis.Set(ctx, "machine-status:"+imageStatus.MachineId, string(data), 0)
-		iter := infra.Redis.Scan(ctx, 0,"machine-status:*", 0).Iterator()
-		
-		for iter.Next(ctx) {
-	    key := iter.Val()
-	
-	    value, err := infra.Redis.Get(ctx, key).Result()
-	    if err != nil {
-	        continue
-	    }
-	
-	    fmt.Println(key, value)
-
-	}
-	
 	
 	fmt.Println(time.Now().Unix(), " | Nova requisição ", imageStatus)
 	return &emptypb.Empty{}, nil
