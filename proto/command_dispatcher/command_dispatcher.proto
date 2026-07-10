@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package proto.command_dispatcher;
+option go_package = "github.com/coigo/micro-cloud/proto/command_dispatcher";
+
+service CommandDispatcherService {
+   rpc CreateCommand (CreateCommandRequest) returns (CommandResponse);
+   rpc DownCommand (DownCommandRequest) returns (CommandResponse);
+}
+
+enum ContainerSize {
+   SMALL = 0;
+   MEDIUM = 1;
+   LARGE = 2;
+}
+
+message CreateCommandRequest {
+   ContainerSize container_size = 1; 
+}
+
+message DownCommandRequest {
+   string container_id = 1; 
+}
+
+message CommandResponse {
+   string container_id = 1;
+}
+
