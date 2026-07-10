@@ -2,7 +2,7 @@ package main
 
 import (
 	// "fmt"
-	// "github.com/coigo/micro-cloud/commandservice"
+	"github.com/coigo/micro-cloud/commandservice"
 	"context"
 	"fmt"
 	"net"
@@ -16,7 +16,7 @@ import (
 func main () {
 
 	ctx := context.Background()
-
+	commandservice.UpCommand()
 	infra.NewRedisConn(ctx)
 
 	lis, err := net.Listen("tcp",":50051")
