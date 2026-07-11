@@ -35,7 +35,6 @@ func main () {
 		}
 	}()
 	
-	
 	wg.Wait()
 	
 	// dockerId := commandservice.UpCommand()
