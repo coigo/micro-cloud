@@ -2,12 +2,14 @@ package main
 
 import (
 	// "fmt"
-	"github.com/coigo/micro-cloud/commandservice"
 	"context"
 	"fmt"
 	"net"
 	"sync"
 
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	cd "github.com/coigo/micro-cloud/proto/command_dispatcher"
 	"github.com/coigo/micro-cloud/infra"
 	"github.com/coigo/micro-cloud/statusreciever"
 	// "google.golang.org/grpc"
@@ -16,7 +18,6 @@ import (
 func main () {
 
 	ctx := context.Background()
-	commandservice.UpCommand()
 	infra.NewRedisConn(ctx)
 
 	lis, err := net.Listen("tcp",":50051")
@@ -36,6 +37,16 @@ func main () {
 	}()
 	
 	wg.Wait()
+
+	conn, err := grpc.NewClient("dind1:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		fmt.Errorf("Erro com o client:", err)
+	}
+
+	c := cd.NewCommandDispatcherServiceClient(conn)
+	c.CreateCommand(ctx, &cd.CreateCommandRequest{
+		ContainerSize: cd.ContainerSize_SMALL,
+	})
 	
 	// dockerId := commandservice.UpCommand()
 	fmt.Printf("Container %v criado.\n")
