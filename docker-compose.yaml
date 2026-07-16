@@ -16,6 +16,8 @@ services:
       mem_limit: 1g
       mem_reservation: 512m
       cpus: "0.50"
+      ports:
+        - 50050:50051 
       volumes:
          - dind1-data:/var/lib/docker
       restart: unless-stopped

@@ -36,7 +36,6 @@ func main () {
 		}
 	}()
 	
-	wg.Wait()
 
 	conn, err := grpc.NewClient("dind1:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -44,11 +43,16 @@ func main () {
 	}
 
 	c := cd.NewCommandDispatcherServiceClient(conn)
-	c.CreateCommand(ctx, &cd.CreateCommandRequest{
+	resp, err := c.CreateCommand(ctx, &cd.CreateCommandRequest{
 		ContainerSize: cd.ContainerSize_SMALL,
 	})
 	
+	if err != nil {
+		fmt.Errorf("Erro na req:", err)
+	}
+	
 	// dockerId := commandservice.UpCommand()
-	fmt.Printf("Container %v criado.\n")
+	fmt.Printf("Container %v criado.\n", resp.ContainerId)
+	wg.Wait()
 	// commandservice.DownCommand(dockerId)
 }

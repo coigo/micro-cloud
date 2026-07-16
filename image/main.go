@@ -62,19 +62,20 @@ func main() {
 			time.Sleep(5 * time.Second)
 		}
 	}()
-	wp.Wait()
 
 
 	ctx := context.Background()
 
-	lis, err := net.Listen("tcp", "50051")
+	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
-		fmt.Errorf("Erro ouvindo: %v", err)
+	    fmt.Println("Erro ouvindo: %v", err)
 	}
+
 	server := commands.NewServer(ctx)
 	if err := server.Serve(lis); err != nil {
 		fmt.Errorf("Erro servindo: %v", err)
 	}
+	wp.Wait()
 	
 	
 }

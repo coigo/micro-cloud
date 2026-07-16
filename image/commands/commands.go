@@ -14,6 +14,8 @@ type server struct {
 }
 
 func (s *server) CreateCommand(ctx context.Context, req *proto.CreateCommandRequest) (*proto.CommandResponse, error) {
+	fmt.Println("Criando container")
+
 	contaienrId, err := docker.CreateContainer(ctx)
 	if err != nil {
 		fmt.Println("Erro criando o container", err)
