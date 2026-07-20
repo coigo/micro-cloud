@@ -17,9 +17,12 @@ import (
 )
 
 func main() {
+
+	ctx := context.Background()
+
 	conn, err := grpc.NewClient("controll:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		fmt.Errorf("Erro ->> %v", err)
+		fmt.Println("Erro ->> %v", err)
 	}
 	defer conn.Close()
 
@@ -29,42 +32,16 @@ func main() {
 	defer docker.CloseDockerClient()
 
 	
-
 	var wp sync.WaitGroup
 	wp.Add(1)
+
 	go func () {
-	
+		defer wp.Done()
 		for {
-			fmt.Println("weee")
-	
-			hostname, err := os.Hostname()
-			if err != nil {
-				fmt.Errorf("host err %v" , err)
-				
-			}
-			
-			memMax, _ := os.ReadFile("/sys/fs/cgroup/memory.max")
-			cpuMax, _ := os.ReadFile("/sys/fs/cgroup/cpu.max")
-			
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			
-			fmt.Println("Fazendo requisição")
-			c.ShareStatus(ctx, &proto.ImageStatus{
-				MachineId:     hostname,
-				CpuUsage:      "",
-				RamUsage:      "",
-				RunningImages: []*proto.RunningImage{},
-				CpuTotal:      string(cpuMax),
-				RamTotal:      string(memMax),
-			})
-			
-			time.Sleep(5 * time.Second)
+			ControllerRequest(ctx, c)
+			time.Sleep(time.Second * 5)
 		}
 	}()
-
-
-	ctx := context.Background()
 
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
@@ -73,9 +50,48 @@ func main() {
 
 	server := commands.NewServer(ctx)
 	if err := server.Serve(lis); err != nil {
-		fmt.Errorf("Erro servindo: %v", err)
+		fmt.Println("Erro servindo: %v", err)
 	}
 	wp.Wait()
 	
 	
+}
+
+func ControllerRequest (ctx context.Context, c proto.StatusReceiverServiceClient) {
+			hostname, err := os.Hostname()
+			if err != nil {
+				fmt.Println("host err %v" , err)
+				
+			}
+			
+			memMax, _ := os.ReadFile("/sys/fs/cgroup/memory.max")
+			cpuMax, _ := os.ReadFile("/sys/fs/cgroup/cpu.max")
+			containers, err := docker.ListContainers(ctx)
+			if err != nil {
+				fmt.Println("Erro buscando containers", err)
+			}
+
+			runningContainers := []*proto.RunningImage{} 
+			for _, container := range(containers) {
+			    runningContainers = append(runningContainers, &proto.RunningImage{
+			        MachineId: container.ID,
+			        CpuUsage:  "",
+			        RamUsage:  "",
+			        CpuTotal:  fmt.Sprintf("%d", container.NanoCPUs),
+			        RamTotal:  fmt.Sprintf("%d", container.MemoryMax),
+			    })
+			}
+			
+			ctx, cancel := context.WithTimeout(ctx, time.Second)
+			defer cancel()
+			
+			fmt.Println("Fazendo requisição")
+			c.ShareStatus(ctx, &proto.ImageStatus{
+				MachineId:     hostname,
+				CpuUsage:      "",
+				RamUsage:      "",
+				RunningImages: runningContainers,
+				CpuTotal:      string(cpuMax),
+				RamTotal:      string(memMax),
+			})
 }

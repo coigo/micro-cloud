@@ -7,11 +7,11 @@ import (
 	"net"
 	"sync"
 
+	"github.com/coigo/micro-cloud/infra"
+	cd "github.com/coigo/micro-cloud/proto/command_dispatcher"
+	"github.com/coigo/micro-cloud/statusreciever"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	cd "github.com/coigo/micro-cloud/proto/command_dispatcher"
-	"github.com/coigo/micro-cloud/infra"
-	"github.com/coigo/micro-cloud/statusreciever"
 	// "google.golang.org/grpc"
 )
 
@@ -56,3 +56,6 @@ func main () {
 	wg.Wait()
 	// commandservice.DownCommand(dockerId)
 }
+
+// CALCULAR O PROCESSAMENTO DISPONIVEL
+// LIMITAR OS RESULTADOS DE CONTAINERS POR PROCESSAMENTO DISPONIVEL
