@@ -3,6 +3,7 @@ package statusreciever
 import (
 	"encoding/json"
 	"strconv"
+	"strings"
 	"time"
 
 	"context"
@@ -25,6 +26,13 @@ func (s *server) ShareStatus(ctx context.Context, imageStatus *proto.ImageStatus
 		imageStatus.RamUsage += container.RamTotal
 	}
 
+	parsedCPU, err := ParseCPUTotal(imageStatus.CpuTotal)
+	if err != nil {
+		fmt.Println("Erro parseando CPU", err)
+		return nil, err
+	}
+	imageStatus.CpuTotal = fmt.Sprintf("%.2f", parsedCPU) 
+
 	data, err := json.Marshal(imageStatus)
 	if err != nil {
 		fmt.Println("Erro ao parsear a resposta:", err)
@@ -39,6 +47,7 @@ func (s *server) ShareStatus(ctx context.Context, imageStatus *proto.ImageStatus
 	fmt.Println(time.Now().Unix(), " | Nova requisição ", imageStatus)
 	return &emptypb.Empty{}, nil
 }
+
 func NewServer () *grpc.Server{
 	grpcServer := grpc.NewServer()
 	proto.RegisterStatusReceiverServiceServer(grpcServer, &server{})
@@ -65,4 +74,31 @@ func SumUsage(machine string, container string) string {
 	}
 
 	return fmt.Sprintf("%.2f", machineUsage+containerUsage)
+}
+
+func ParseCPUTotal(cpuTotal string) (float64, error) {
+	limpo := strings.TrimSpace(cpuTotal)
+	partes := strings.Fields(limpo)
+	if len(partes) != 2 {
+		return 0, fmt.Errorf("formato inválido de cpu_total: %q", cpuTotal)
+	}
+
+	quota, err := strconv.ParseFloat(partes[0], 64)
+	if err != nil {
+		return 0, fmt.Errorf("erro parseando quota: %w", err)
+	}
+
+	periodo, err := strconv.ParseFloat(partes[1], 64)
+	if err != nil {
+		return 0, fmt.Errorf("erro parseando período: %w", err)
+	}
+
+	if periodo == 0 {
+		return 0, fmt.Errorf("período não pode ser zero")
+	}
+
+	cores := quota / periodo
+	nanosPorSegundo := cores * 1_000_000_000
+
+	return nanosPorSegundo, nil
 }
