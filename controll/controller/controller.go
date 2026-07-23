@@ -5,9 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/coigo/micro-cloud/infra"
-	proto "github.com/coigo/micro-cloud/proto/status_receiver"
+	cd "github.com/coigo/micro-cloud/proto/command_dispatcher"
+	sr "github.com/coigo/micro-cloud/proto/status_receiver"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type NewContainer struct {
@@ -27,15 +31,40 @@ const (
 	LARGE
 )
 
-func OnUpdate() {
+func CreateContainer (ctx context.Context) {
 
+	minMem := int64(128 * 1024 * 1024) // 512MB livre mínimo
+	minCpu := 100_000_000.0  
+	
+	machines := infra.Redis.Scan(ctx, 0, "machine-status:*", 0).Iterator()
+	bestOne := FindBestMachines(ctx, machines, minCpu, minMem)
+	if len(bestOne) != 0 {
+		address := bestOne[0].MachineId
+		fmt.Println("address", address)
+		conn, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+		c := cd.NewCommandDispatcherServiceClient(conn)
+		if err != nil {
+			fmt.Println("Erro com o client:", err)
+		}
+	
+		resp, err := c.CreateCommand(ctx, &cd.CreateCommandRequest{
+			ContainerSize: cd.ContainerSize_SMALL,
+		})
+
+		if err != nil {
+			fmt.Println("Erro na req:", err)
+		}
+		fmt.Printf("Container criado em %v com id", resp.ContainerId)
+	}
+	
 }
 
-func FindBestMachines(ctx context.Context, iter interface{ Next(context.Context) bool; Val() string }, containerCpu float64, containerMem int64) []MachinePoints {
-	minMem := int64(512 * 1024 * 1024) // 512MB livre mínimo
+func FindBestMachines(ctx context.Context, iter interface{ Next(context.Context) bool; Val() string }, containerCpu float64, containerMem int64) []*MachinePoints {
+	minMem := int64(128 * 1024 * 1024) // 512MB livre mínimo
 	minCpu := 100_000_000.0            // 0.1 core livre mínimo (em ns/s)
 
-	var valid []MachinePoints
+	var valid []*MachinePoints
 
 	for iter.Next(ctx) {
 		key := iter.Val()
@@ -45,33 +74,16 @@ func FindBestMachines(ctx context.Context, iter interface{ Next(context.Context)
 			continue
 		}
 
-		var machineStatus proto.ImageStatus
+		var machineStatus sr.ImageStatus
 		if err := json.Unmarshal([]byte(value), &machineStatus); err != nil {
 			fmt.Println("Erro lendo dados da máquina:", err)
 			continue
 		}
 
-		cpuTotal, err := strconv.ParseFloat(machineStatus.CpuTotal, 64)
-		if err != nil {
-			fmt.Println("Erro parseando CpuTotal:", err)
-			continue
-		}
-		cpuUsage, err := strconv.ParseFloat(machineStatus.CpuUsage, 64)
-		if err != nil {
-			fmt.Println("Erro parseando CpuUsage:", err)
-			continue
-		}
-		ramTotal, err := strconv.ParseInt(machineStatus.RamTotal, 10, 64)
-		if err != nil {
-			fmt.Println("Erro parseando RamTotal:", err)
-			continue
-		}
-		
-		ramUsage, err := strconv.ParseInt(machineStatus.RamUsage, 10, 64)
-		if err != nil {
-			fmt.Println("Erro parseando RamUsage:", err)
-			continue
-		}
+		cpuUsage := parseFloatOrZero(machineStatus.CpuUsage)
+		cpuTotal := parseFloatOrZero(machineStatus.CpuTotal)
+		ramTotal := parseIntOrZero(machineStatus.RamTotal)
+		ramUsage := parseIntOrZero(machineStatus.RamUsage)
 
 		cpuLivre := cpuTotal - cpuUsage
 		ramLivre := ramTotal - ramUsage
@@ -96,13 +108,39 @@ func FindBestMachines(ctx context.Context, iter interface{ Next(context.Context)
 			pontos = 0
 		}
 
-		valid = append(valid, MachinePoints{
+		valid = append(valid, &MachinePoints{
 			MachineId: machineStatus.MachineId,
 			Points:    pontos,
 		})
 	}
 
 	return valid
+}
+
+func parseIntOrZero(valor string) int64 {
+	valor = strings.TrimSpace(valor) // remove \n, \r, espaços extras
+	if valor == "" {
+		return 0
+	}
+	numero, err := strconv.ParseInt(valor, 10, 64)
+	if err != nil {
+		fmt.Println("Erro parseando int:", valor, "-", err)
+		return 0
+	}
+	return numero
+}
+
+func parseFloatOrZero(valor string) float64 {
+	valor = strings.TrimSpace(valor) // mesma correção aqui
+	if valor == "" {
+		return 0
+	}
+	numero, err := strconv.ParseFloat(valor, 64)
+	if err != nil {
+		fmt.Println("Erro parseando float:", valor, "-", err)
+		return 0
+	}
+	return numero
 }
 
 	// eu tenho que buscar fechar uma maquina por inteiro? na minha visao isso parece o correto

@@ -13,25 +13,31 @@ services:
       build: ./image
       container_name: dind1
       privileged: true
-      mem_limit: 1g
+      mem_limit: 512m
       mem_reservation: 512m
       cpus: "0.50"
       ports:
         - 50050:50051 
       volumes:
          - dind1-data:/var/lib/docker
+      environment:
+        - CONTAINER_ADDRESS=dind1:50051
       restart: unless-stopped
-
-  # dind2:
-  #   image: docker:dind
-  #   container_name: dind2
-  #   privileged: true
-  #   mem_limit: 1g
-  #   mem_reservation: 512m
-  #   cpus: "0.50"
-  #   volumes:
-  #     - dind2-data:/var/lib/docker
-  #   restart: unless-stopped
+      
+   dind2:
+      build: ./image
+      container_name: dind2
+      privileged: true
+      mem_limit: 512m
+      mem_reservation: 512m
+      cpus: "0.50"
+      ports:
+        - 50052:50051 
+      volumes:
+         - dind2-data:/var/lib/docker
+      environment:
+        - CONTAINER_ADDRESS=dind2:50051
+      restart: unless-stopped
 
    redis:
     image: redis:8-alpine

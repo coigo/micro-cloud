@@ -22,7 +22,8 @@ type server struct {
 
 func (s *server) ShareStatus(ctx context.Context, imageStatus *proto.ImageStatus) (*emptypb.Empty, error) {
 	for _, container := range imageStatus.RunningImages {
-		imageStatus.CpuUsage = SumUsage(imageStatus.CpuUsage, container.CpuTotal)
+		cpuUsage := SumUsage(imageStatus.CpuUsage, container.CpuTotal) 
+		imageStatus.CpuUsage = cpuUsage
 		imageStatus.RamUsage += container.RamTotal
 	}
 
@@ -72,7 +73,7 @@ func SumUsage(machine string, container string) string {
 	if err != nil {
 		fmt.Println("Erro parseando dados do container:", err)
 	}
-
+	fmt.Println("calculando uso: ", fmt.Sprintf("%.2f", machineUsage+containerUsage))
 	return fmt.Sprintf("%.2f", machineUsage+containerUsage)
 }
 

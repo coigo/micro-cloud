@@ -1,18 +1,16 @@
 package main
 
 import (
-	// "fmt"
 	"context"
 	"fmt"
 	"net"
 	"sync"
+	"time"
 
+	"github.com/coigo/micro-cloud/controller"
 	"github.com/coigo/micro-cloud/infra"
-	cd "github.com/coigo/micro-cloud/proto/command_dispatcher"
 	"github.com/coigo/micro-cloud/statusreciever"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	// "google.golang.org/grpc"
+	
 )
 
 func main () {
@@ -35,26 +33,12 @@ func main () {
 			fmt.Errorf("Erro ->>.", err)
 		}
 	}()
-	
 
-	conn, err := grpc.NewClient("dind1:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		fmt.Errorf("Erro com o client:", err)
+	for {
+		controller.CreateContainer(ctx)
+		time.Sleep(10 * time.Second)
 	}
 
-	c := cd.NewCommandDispatcherServiceClient(conn)
-	resp, err := c.CreateCommand(ctx, &cd.CreateCommandRequest{
-		ContainerSize: cd.ContainerSize_SMALL,
-	})
-	
-	if err != nil {
-		fmt.Errorf("Erro na req:", err)
-	}
-	
-	// dockerId := commandservice.UpCommand()
-	fmt.Printf("Container %v criado.\n", resp.ContainerId)
-	wg.Wait()
-	// commandservice.DownCommand(dockerId)
 }
 
 // CALCULAR O PROCESSAMENTO DISPONIVEL

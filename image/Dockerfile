@@ -20,6 +20,6 @@ COPY ./start.sh /start.sh
 RUN chmod +x /start.sh
 RUN dos2unix /start.sh
 
-EXPOSE 2375 2376 50051
+EXPOSE 50051
 
 ENTRYPOINT ["/start.sh"]

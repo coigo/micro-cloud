@@ -58,11 +58,7 @@ func main() {
 }
 
 func ControllerRequest (ctx context.Context, c proto.StatusReceiverServiceClient) {
-			hostname, err := os.Hostname()
-			if err != nil {
-				fmt.Println("host err %v" , err)
-				
-			}
+			address:= os.Getenv("CONTAINER_ADDRESS")
 			
 			memMax, _ := os.ReadFile("/sys/fs/cgroup/memory.max")
 			cpuMax, _ := os.ReadFile("/sys/fs/cgroup/cpu.max")
@@ -87,7 +83,7 @@ func ControllerRequest (ctx context.Context, c proto.StatusReceiverServiceClient
 			
 			fmt.Println("Fazendo requisição")
 			c.ShareStatus(ctx, &proto.ImageStatus{
-				MachineId:     hostname,
+				MachineId:     address,
 				CpuUsage:      "",
 				RamUsage:      "",
 				RunningImages: runningContainers,

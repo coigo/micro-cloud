@@ -55,7 +55,7 @@ func CreateContainer (ctx context.Context) (*string, error) {
 
 	hostConfig := &container.HostConfig{
 		Resources: container.Resources{
-			Memory: 512 * 1024 * 1024,
+			Memory: 128 * 1024 * 1024,
 			NanoCPUs: 100_000_000,
 		},
 	}
@@ -76,7 +76,7 @@ func CreateContainer (ctx context.Context) (*string, error) {
 }
 
 func ListContainers (ctx context.Context) ([]*ContainerResources, error) {
-	 	summaries, err := Client.ContainerList(ctx, container.ListOptions{})
+ 	summaries, err := Client.ContainerList(ctx, container.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
